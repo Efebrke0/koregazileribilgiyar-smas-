@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kore Gazilerimizi Anma Bilgi Yarışması</title>
+    
+    <style>
+        /* CSS Kodları */
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #e6e6e6;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+        }
+
+        #quiz-container {
+            background-color: #ffffff;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 8px 15px rgba(0, 0, 0, 0.2);
+            width: 90%;
+            max-width: 650px;
+            text-align: center;
+            border-top: 5px solid #cc0000; /* Kırmızı şerit */
+        }
+
+        h1 {
+            color: #cc0000;
+            margin-bottom: 25px;
+            border-bottom: 2px dashed #eee;
+            padding-bottom: 10px;
+        }
+
+        #question-text {
+            font-size: 1.3em;
+            margin-bottom: 20px;
+            color: #333;
+            font-weight: 500;
+        }
+
+        #answers-container {
+            margin-bottom: 20px;
+        }
+
+        .answer-btn {
+            display: block;
+            width: 100%;
+            padding: 12px;
+            margin: 10px 0;
+            background-color: #007bff; /* Mavi - Temaya uygun bir renk */
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1.1em;
+            transition: background-color 0.3s, transform 0.1s;
+        }
+
+        .answer-btn:hover:not(:disabled) {
+            background-color: #0056b3;
+            transform: translateY(-2px);
+        }
+        
+        /* Doğru ve Yanlış cevaplar için stil */
+        .correct {
+            background-color: #28a745 !important; /* Yeşil */
+            color: white;
+            font-weight: bold;
+        }
+
+        .wrong {
+            background-color: #dc3545 !important; /* Kırmızı */
+            color: white;
+        }
+
+        #info-box {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 8px;
+            min-height: 60px;
+            background-color: #f8f9fa;
+            border: 1px solid #ddd;
+            text-align: left;
+            font-size: 0.95em;
+        }
+        
+        #feedback-text {
+            font-weight: 500;
+            line-height: 1.4;
+        }
+
+        #next-btn {
+            padding: 10px 25px;
+            background-color: #ffc107; /* Sarı - Dikkat çekici */
+            color: #333;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-top: 15px;
+            font-size: 1.1em;
+            font-weight: bold;
+            transition: background-color 0.3s;
+        }
+        
+        #next-btn:hover {
+            background-color: #e0a800;
+        }
+        
+        #score-area {
+            margin-top: 20px;
+            font-size: 1.1em;
+            color: #555;
+            font-weight: bold;
+        }
+        
+        .final-message {
+            margin-top: 30px;
+            color: #cc0000;
+            font-size: 1.4em;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+
+    <div id="quiz-container">
+        <h1>Kore Gazilerimizi Anma Bilgi Yarışması</h1>
+        
+        <div id="question-area">
+            <p id="question-text">Soru metni burada görünecek.</p>
+            
+            <div id="answers-container">
+                </div>
+        </div>
+        
+        <div id="info-box">
+            <p id="feedback-text">Haydi başlayalım! Kore Savaşı'nın tarihi ve gazilerimizin fedakarlıkları hakkında bilginizi test edin.</p>
+            <button id="next-btn" style="display:none;">Sonraki Soru</button>
+        </div>
+
+        <div id="score-area">
+            <p>Puan: <span id="score">0</span> / <span id="total-questions"></span></p>
+        </div>
+    </div>
+
+    <script>
+        // JavaScript Kodları
+        const questions = [
+            {
+                question: "Türkiye, Birleşmiş Milletler çağrısıyla Kore Savaşı'na hangi yıl katıldı?",
+                answers: ["1948", "1950", "1953", "1955"],
+                correct: "1950",
+                info: "Türkiye, Birleşmiş Milletler Paktı'nın bir üyesi olarak, 25 Haziran 1950'de başlayan savaşa Eylül ayında bir askeri birlik göndererek katılmıştır."
+            },
+            {
+                question: "Türk Tugayı'nın Kore'de kazandığı ve dünyaya kahramanlığını kanıtladığı en önemli zafer hangisidir?",
+                answers: ["Pusan Savunması", "Wonosu Savaşı", "Kumyangjangni Savaşı", "Inchon Çıkarması"],
+                correct: "Kumyangjangni Savaşı",
+                info: "Türk Tugayı, Kumyangjangni'de kendisinden kat kat büyük Çin birliklerini durdurarak büyük bir başarı göstermiş ve 'Kore Kahramanları' unvanını almıştır."
+            },
+            {
+                question: "Türk askerlerinin, bölgede kazandıkları saygıdan dolayı Kore halkı tarafından takılan lakap nedir?",
+                answers: ["Ay Yıldızlar", "Mavi Şahinler", "Kardeş Kanı", "Demir Yumruk"],
+                correct: "Kardeş Kanı",
+                info: "Kore halkı, Türk askerlerinin kahramanlığına ve kültürel yakınlığına vurgu yaparak onlara 'Kardeş Kanı' anlamına gelen bir ifadeyle hitap etmişlerdir."
+            },
+            {
+                question: "Kore Savaşı sırasında Türkiye Cumhuriyeti'nin Cumhurbaşkanı kimdi?",
+                answers: ["İsmet İnönü", "Celâl Bayar", "Adnan Menderes", "Cemal Gürsel"],
+                correct: "Celâl Bayar",
+                info: "Savaşın başladığı ve Türkiye'nin asker gönderdiği dönemde (1950-1953) Türkiye Cumhuriyeti'nin Cumhurbaşkanı Celâl Bayar'dı."
+            },
+            {
+                question: "Kore Savaşı kaç yılında ateşkes ile sona ermiştir?",
+                answers: ["1951", "1953", "1955", "1960"],
+                correct: "1953",
+                info: "Kore Savaşı, 27 Temmuz 1953'te imzalanan Panmunjom Ateşkes Antlaşması ile fiilen sona ermiştir, ancak teknik olarak bir barış anlaşması hala imzalanmamıştır."
+            },
+            {
+                question: "Türk şehitlerinin anısına Kore'de hangi şehirde bir anıt ve mezarlık bulunmaktadır?",
+                answers: ["Seul", "Pusan (Busan)", "Inchon", "Pyongyang"],
+                correct: "Pusan (Busan)",
+                info: "Türk şehitlerinin büyük bir kısmı, Kore'nin ikinci büyük şehri olan Pusan'daki (şimdiki adıyla Busan) Birleşmiş Milletler Anıtsal Mezarlığı'nda ebedi istirahatgâhlarında yatmaktadır."
+            },
+            {
+                question: "Türk Tugayı, savaş sırasında hangi Birleşmiş Milletler Kolordusu'na bağlı olarak görev yapmıştır?",
+                answers: ["ABD 1. Kolordu", "İngiliz 5. Kolordu", "Avustralya 3. Kolordu", "Fransız 2. Kolordu"],
+                correct: "ABD 1. Kolordu",
+                info: "Türk Tugayı, savaş boyunca ABD'nin farklı tümenleri ve özellikle ABD 1. Kolordusu'nun komutası altında görev almıştır."
+            },
+            {
+                question: "Kore Savaşı'na katılan Türk askerlerinin ilk ana görev yeri ve en büyük lojistik üssü neresiydi?",
+                answers: ["Tokyo, Japonya", "Pusan, Kore", "Taegu, Kore", "Ankara, Türkiye"],
+                correct: "Pusan, Kore",
+                info: "Türk birlikleri deniz yoluyla Pusan limanına ulaşmış ve Kore'deki ilk büyük üslerini ve lojistik merkezlerini burada kurmuşlardır."
+            },
+            {
+                question: "Kore Savaşı'nın Kuzey ve Güney Kore arasındaki kalıcı bölünme hattı yaklaşık olarak hangi paraleldir?",
+                answers: ["17. Paralel", "38. Paralel", "42. Paralel", "49. Paralel"],
+                correct: "38. Paralel",
+                info: "Savaş öncesinde de var olan ve ateşkes sonrası sınır olarak kabul edilen hat, yaklaşık olarak 38. kuzey paralelinden geçmektedir ve günümüzde Kore Tarafsız Bölgesi (DMZ) olarak bilinir."
+            },
+            {
+                question: "Savaşta hayatını kaybeden Türk şehitlerinin tahmini sayısı kaçtır?",
+                answers: ["700 civarı", "1500 civarı", "3000 civarı", "5000 civarı"],
+                correct: "700 civarı",
+                info: "Resmi kayıtlara göre Kore Savaşı'nda 700'den fazla Türk askeri şehit olmuştur. Şehitlerimizin kahramanlıkları unutulmamıştır."
+            }
+        ];
+        
+        let currentQuestionIndex = 0;
+        let score = 0;
+
+        const questionText = document.getElementById('question-text');
+        const answersContainer = document.getElementById('answers-container');
+        const feedbackText = document.getElementById('feedback-text');
+        const nextButton = document.getElementById('next-btn');
+        const scoreDisplay = document.getElementById('score');
+        const totalQuestionsDisplay = document.getElementById('total-questions');
+
+        totalQuestionsDisplay.textContent = questions.length;
+
+        function loadQuestion() {
+            // Soru alanını ve butonları temizle
+            answersContainer.innerHTML = '';
+            
+            // Geçerli soruyu al
+            const currentQ = questions[currentQuestionIndex];
+            questionText.textContent = `${currentQuestionIndex + 1}. ${currentQ.question}`;
+            feedbackText.innerHTML = "Cevabınızı seçmek için butona tıklayın.";
+            nextButton.style.display = 'none';
+
+            // Cevap butonlarını oluştur
+            currentQ.answers.forEach(answer => {
+                const button = document.createElement('button');
+                button.classList.add('answer-btn');
+                button.textContent = answer;
+                button.addEventListener('click', () => checkAnswer(answer, currentQ.correct, currentQ.info, button));
+                answersContainer.appendChild(button);
+            });
+        }
+
+        function checkAnswer(selectedAnswer, correctAnswer, info, clickedButton) {
+            // Cevap kontrol edildikten sonra tüm butonları devre dışı bırak
+            Array.from(answersContainer.children).forEach(btn => btn.disabled = true);
+            
+            // Doğru cevabı bul ve işaretle
+            const correctButton = Array.from(answersContainer.children).find(btn => btn.textContent === correctAnswer);
+
+            if (selectedAnswer === correctAnswer) {
+                score++;
+                scoreDisplay.textContent = score;
+                feedbackText.innerHTML = `✅ **Doğru!** Mükemmel. <br> **Ek Bilgi:** ${info}`;
+                clickedButton.classList.add('correct');
+            } else {
+                feedbackText.innerHTML = `❌ **Yanlış.** Doğru cevap: **${correctAnswer}** idi. <br> **Ek Bilgi:** ${info}`;
+                clickedButton.classList.add('wrong');
+                correctButton.classList.add('correct'); // Doğru cevabı göster
+            }
+
+            nextButton.style.display = 'block';
+        }
+
+        function nextQuestion() {
+            currentQuestionIndex++;
+            if (currentQuestionIndex < questions.length) {
+                loadQuestion();
+            } else {
+                showResults();
+            }
+        }
+
+        function showResults() {
+            questionText.textContent = "Yarışma Tamamlandı!";
+            answersContainer.innerHTML = '';
+            feedbackText.innerHTML = `
+                Tebrikler! ${questions.length} soruda **${score}** doğru cevap verdiniz. <br>
+                Bu önemli tarihi konuya gösterdiğiniz ilgi için teşekkür ederiz.
+            `;
+            nextButton.style.display = 'none';
+            
+            const finalMessage = document.createElement('p');
+            finalMessage.classList.add('final-message');
+            finalMessage.innerHTML = "Tüm Şehitlerimizi ve Gazilerimizi Saygı ve Minnetle Anıyoruz!";
+            answersContainer.appendChild(finalMessage);
+        }
+
+        // Başlangıç işlevi
+        nextButton.addEventListener('click', nextQuestion);
+        loadQuestion();
+    </script>
+</body>
+</html>
