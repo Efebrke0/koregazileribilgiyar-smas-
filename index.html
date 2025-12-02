@@ -6,7 +6,6 @@
     <title>Kore Gazilerimizi Anma Bilgi Yarışması</title>
     
     <style>
-        /* CSS Kodları */
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             background-color: #e6e6e6;
@@ -15,6 +14,7 @@
             align-items: center;
             min-height: 100vh;
             margin: 0;
+            padding: 20px; 
         }
 
         #quiz-container {
@@ -25,7 +25,7 @@
             width: 90%;
             max-width: 650px;
             text-align: center;
-            border-top: 5px solid #cc0000; /* Kırmızı şerit */
+            border-top: 5px solid #cc0000;
         }
 
         h1 {
@@ -42,22 +42,18 @@
             font-weight: 500;
         }
 
-        #answers-container {
-            margin-bottom: 20px;
-        }
-
         .answer-btn {
             display: block;
             width: 100%;
             padding: 12px;
             margin: 10px 0;
-            background-color: #007bff; /* Mavi - Temaya uygun bir renk */
+            background-color: #007bff;
             color: white;
             border: none;
             border-radius: 8px;
             cursor: pointer;
             font-size: 1.1em;
-            transition: background-color 0.3s, transform 0.1s;
+            transition: background-color 0.3s, transform 0.1s, border 0.2s;
         }
 
         .answer-btn:hover:not(:disabled) {
@@ -65,15 +61,20 @@
             transform: translateY(-2px);
         }
         
-        /* Doğru ve Yanlış cevaplar için stil */
+        .answer-btn.pending-selection {
+            background-color: #ff9800;
+            border: 3px solid #ff5722;
+            transform: scale(1.02);
+        }
+        
         .correct {
-            background-color: #28a745 !important; /* Yeşil */
+            background-color: #28a745 !important;
             color: white;
             font-weight: bold;
         }
 
         .wrong {
-            background-color: #dc3545 !important; /* Kırmızı */
+            background-color: #dc3545 !important;
             color: white;
         }
 
@@ -88,40 +89,92 @@
             font-size: 0.95em;
         }
         
-        #feedback-text {
-            font-weight: 500;
-            line-height: 1.4;
+        #matching-container {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 20px;
+            gap: 20px;
         }
 
-        #next-btn {
-            padding: 10px 25px;
-            background-color: #ffc107; /* Sarı - Dikkat çekici */
-            color: #333;
-            border: none;
+        .column {
+            flex: 1;
+            padding: 10px;
+            background-color: #f4f4f4;
+            border-radius: 8px;
+        }
+
+        .match-item {
+            padding: 10px;
+            margin: 8px 0;
             border-radius: 5px;
             cursor: pointer;
-            margin-top: 15px;
-            font-size: 1.1em;
-            font-weight: bold;
-            transition: background-color 0.3s;
+            transition: background-color 0.2s, box-shadow 0.2s, border 0.2s;
+            font-weight: 600;
+        }
+
+        .left-item {
+            background-color: #007bff;
+            color: white;
+        }
+
+        .right-item {
+            background-color: #ffc107;
+            color: #333;
+        }
+
+        .match-item:hover:not(.selected):not(.matched) {
+            opacity: 0.8;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+
+        .match-item.selected {
+            border: 3px solid #cc0000;
+            opacity: 1;
+            box-shadow: 0 0 10px #cc0000;
         }
         
-        #next-btn:hover {
-            background-color: #e0a800;
+        .match-item.pending-selection {
+            border: 3px solid #ff5722 !important;
+            box-shadow: 0 0 10px #ff9800 !important;
+        }
+
+        .match-item.matched {
+            background-color: #28a745;
+            color: white;
+            cursor: default;
         }
         
-        #score-area {
-            margin-top: 20px;
-            font-size: 1.1em;
+        .matching-title {
             color: #555;
+            font-size: 1.1em;
+            margin-bottom: 15px;
             font-weight: bold;
         }
         
-        .final-message {
-            margin-top: 30px;
+        .matching-score-display {
+            font-size: 1.2em;
             color: #cc0000;
-            font-size: 1.4em;
             font-weight: bold;
+            margin-top: 15px;
+        }
+
+        .final-congrats {
+            color: #cc0000;
+            font-size: 2.2em; 
+            font-weight: 900; 
+            margin: 20px 0 10px 0; 
+            display: block;
+        }
+        
+        .final-tribute-message {
+            font-size: 1em; 
+            font-weight: normal; 
+            color: #555; 
+            padding-top: 10px;
+        }
+        
+        #info-box button {
+            display: block;
         }
     </style>
 </head>
@@ -131,167 +184,382 @@
         <h1>Kore Gazilerimizi Anma Bilgi Yarışması</h1>
         
         <div id="question-area">
-            <p id="question-text">Soru metni burada görünecek.</p>
+            <p id="question-text">Yükleniyor...</p>
             
             <div id="answers-container">
+            </div>
+            
+            <div id="matching-container" style="display:none;">
+                <div class="column">
+                    <div class="matching-title">Kavramlar / Kişiler</div>
+                    <div id="left-column"></div>
                 </div>
+                <div class="column">
+                    <div class="matching-title">Açıklamalar / Tarihler</div>
+                    <div id="right-column"></div>
+                </div>
+            </div>
         </div>
         
         <div id="info-box">
             <p id="feedback-text">Haydi başlayalım! Kore Savaşı'nın tarihi ve gazilerimizin fedakarlıkları hakkında bilginizi test edin.</p>
             <button id="next-btn" style="display:none;">Sonraki Soru</button>
+            <div class="matching-score-display" id="match-score-area" style="display:none;">
+                Eşleşen Sayısı: <span id="match-score">0</span> / 8
+            </div>
         </div>
 
         <div id="score-area">
-            <p>Puan: <span id="score">0</span> / <span id="total-questions"></span></p>
+            <p>Çoktan Seçmeli Puan: <span id="score">0</span> / <span id="total-questions"></span></p>
         </div>
     </div>
 
     <script>
-        // JavaScript Kodları
-        const questions = [
-            {
-                question: "Türkiye, Birleşmiş Milletler çağrısıyla Kore Savaşı'na hangi yıl katıldı?",
-                answers: ["1948", "1950", "1953", "1955"],
-                correct: "1950",
-                info: "Türkiye, Birleşmiş Milletler Paktı'nın bir üyesi olarak, 25 Haziran 1950'de başlayan savaşa Eylül ayında bir askeri birlik göndererek katılmıştır."
-            },
-            {
-                question: "Türk Tugayı'nın Kore'de kazandığı ve dünyaya kahramanlığını kanıtladığı en önemli zafer hangisidir?",
-                answers: ["Pusan Savunması", "Wonosu Savaşı", "Kumyangjangni Savaşı", "Inchon Çıkarması"],
-                correct: "Kumyangjangni Savaşı",
-                info: "Türk Tugayı, Kumyangjangni'de kendisinden kat kat büyük Çin birliklerini durdurarak büyük bir başarı göstermiş ve 'Kore Kahramanları' unvanını almıştır."
-            },
-            {
-                question: "Türk askerlerinin, bölgede kazandıkları saygıdan dolayı Kore halkı tarafından takılan lakap nedir?",
-                answers: ["Ay Yıldızlar", "Mavi Şahinler", "Kardeş Kanı", "Demir Yumruk"],
-                correct: "Kardeş Kanı",
-                info: "Kore halkı, Türk askerlerinin kahramanlığına ve kültürel yakınlığına vurgu yaparak onlara 'Kardeş Kanı' anlamına gelen bir ifadeyle hitap etmişlerdir."
-            },
-            {
-                question: "Kore Savaşı sırasında Türkiye Cumhuriyeti'nin Cumhurbaşkanı kimdi?",
-                answers: ["İsmet İnönü", "Celâl Bayar", "Adnan Menderes", "Cemal Gürsel"],
-                correct: "Celâl Bayar",
-                info: "Savaşın başladığı ve Türkiye'nin asker gönderdiği dönemde (1950-1953) Türkiye Cumhuriyeti'nin Cumhurbaşkanı Celâl Bayar'dı."
-            },
-            {
-                question: "Kore Savaşı kaç yılında ateşkes ile sona ermiştir?",
-                answers: ["1951", "1953", "1955", "1960"],
-                correct: "1953",
-                info: "Kore Savaşı, 27 Temmuz 1953'te imzalanan Panmunjom Ateşkes Antlaşması ile fiilen sona ermiştir, ancak teknik olarak bir barış anlaşması hala imzalanmamıştır."
-            },
-            {
-                question: "Türk şehitlerinin anısına Kore'de hangi şehirde bir anıt ve mezarlık bulunmaktadır?",
-                answers: ["Seul", "Pusan (Busan)", "Inchon", "Pyongyang"],
-                correct: "Pusan (Busan)",
-                info: "Türk şehitlerinin büyük bir kısmı, Kore'nin ikinci büyük şehri olan Pusan'daki (şimdiki adıyla Busan) Birleşmiş Milletler Anıtsal Mezarlığı'nda ebedi istirahatgâhlarında yatmaktadır."
-            },
-            {
-                question: "Türk Tugayı, savaş sırasında hangi Birleşmiş Milletler Kolordusu'na bağlı olarak görev yapmıştır?",
-                answers: ["ABD 1. Kolordu", "İngiliz 5. Kolordu", "Avustralya 3. Kolordu", "Fransız 2. Kolordu"],
-                correct: "ABD 1. Kolordu",
-                info: "Türk Tugayı, savaş boyunca ABD'nin farklı tümenleri ve özellikle ABD 1. Kolordusu'nun komutası altında görev almıştır."
-            },
-            {
-                question: "Kore Savaşı'na katılan Türk askerlerinin ilk ana görev yeri ve en büyük lojistik üssü neresiydi?",
-                answers: ["Tokyo, Japonya", "Pusan, Kore", "Taegu, Kore", "Ankara, Türkiye"],
-                correct: "Pusan, Kore",
-                info: "Türk birlikleri deniz yoluyla Pusan limanına ulaşmış ve Kore'deki ilk büyük üslerini ve lojistik merkezlerini burada kurmuşlardır."
-            },
-            {
-                question: "Kore Savaşı'nın Kuzey ve Güney Kore arasındaki kalıcı bölünme hattı yaklaşık olarak hangi paraleldir?",
-                answers: ["17. Paralel", "38. Paralel", "42. Paralel", "49. Paralel"],
-                correct: "38. Paralel",
-                info: "Savaş öncesinde de var olan ve ateşkes sonrası sınır olarak kabul edilen hat, yaklaşık olarak 38. kuzey paralelinden geçmektedir ve günümüzde Kore Tarafsız Bölgesi (DMZ) olarak bilinir."
-            },
-            {
-                question: "Savaşta hayatını kaybeden Türk şehitlerinin tahmini sayısı kaçtır?",
-                answers: ["700 civarı", "1500 civarı", "3000 civarı", "5000 civarı"],
-                correct: "700 civarı",
-                info: "Resmi kayıtlara göre Kore Savaşı'nda 700'den fazla Türk askeri şehit olmuştur. Şehitlerimizin kahramanlıkları unutulmamıştır."
-            }
-        ];
-        
-        let currentQuestionIndex = 0;
-        let score = 0;
+        document.addEventListener('DOMContentLoaded', () => {
 
-        const questionText = document.getElementById('question-text');
-        const answersContainer = document.getElementById('answers-container');
-        const feedbackText = document.getElementById('feedback-text');
-        const nextButton = document.getElementById('next-btn');
-        const scoreDisplay = document.getElementById('score');
-        const totalQuestionsDisplay = document.getElementById('total-questions');
-
-        totalQuestionsDisplay.textContent = questions.length;
-
-        function loadQuestion() {
-            // Soru alanını ve butonları temizle
-            answersContainer.innerHTML = '';
+            const questions = [
+                {
+                    question: "Türkiye, Birleşmiş Milletler çağrısıyla Kore Savaşı'na hangi yıl katıldı?",
+                    answers: ["1948", "1950", "1953", "1955"],
+                    correct: "1950",
+                    info: "Türkiye, Birleşmiş Milletler Paktı'nın bir üyesi olarak, 25 Haziran 1950'de başlayan savaşa Eylül ayında bir askeri birlik göndererek katılmıştır."
+                },
+                {
+                    question: "Türk Tugayı'nın Kore'de kazandığı ve dünyaya kahramanlığını kanıtladığı en önemli zafer hangisidir?",
+                    answers: ["Pusan Savunması", "Wonosu Savaşı", "Kumyangjangni Savaşı", "Inchon Çıkarması"],
+                    correct: "Kumyangjangni Savaşı",
+                    info: "Türk Tugayı, Kumyangjangni'de kendisinden kat kat büyük Çin birliklerini durdurarak büyük bir başarı göstermiş ve 'Kore Kahramanları' unvanını almıştır."
+                },
+                {
+                    question: "Türk askerlerinin, bölgede kazandıkları saygıdan dolayı Kore halkı tarafından takılan lakap nedir?",
+                    answers: ["Ay Yıldızlar", "Mavi Şahinler", "Kardeş Kanı", "Demir Yumruk"],
+                    correct: "Kardeş Kanı",
+                    info: "Kore halkı, Türk askerlerinin kahramanlığına ve kültürel yakınlığına vurgu yaparak onlara 'Kardeş Kanı' anlamına gelen bir ifadeyle hitap etmişlerdir."
+                },
+                {
+                    question: "Kore Savaşı sırasında Türkiye Cumhuriyeti'nin Cumhurbaşkanı kimdi?",
+                    answers: ["İsmet İnönü", "Celâl Bayar", "Adnan Menderes", "Cemal Gürsel"],
+                    correct: "Celâl Bayar",
+                    info: "Savaşın başladığı ve Türkiye'nin asker gönderdiği dönemde (1950-1953) Türkiye Cumhuriyeti'nin Cumhurbaşkanı Celâl Bayar'dı."
+                },
+                {
+                    question: "Kore Savaşı kaç yılında ateşkes ile sona ermiştir?",
+                    answers: ["1951", "1953", "1955", "1960"],
+                    correct: "1953",
+                    info: "Kore Savaşı, 27 Temmuz 1953'te imzalanan Panmunjom Ateşkes Antlaşması ile fiilen sona ermiştir, ancak teknik olarak bir barış anlaşması hala imzalanmamıştır."
+                },
+                {
+                    question: "Türk şehitlerinin anısına Kore'de hangi şehirde bir anıt ve mezarlık bulunmaktadır?",
+                    answers: ["Seul", "Pusan (Busan)", "Inchon", "Pyongyang"],
+                    correct: "Pusan (Busan)",
+                    info: "Türk şehitlerinin büyük bir kısmı, Kore'nin ikinci büyük şehri olan Pusan'daki (şimdiki adıyla Busan) Birleşmiş Milletler Anıtsal Mezarlığı'nda ebedi istirahatgâhlarında yatmaktadır."
+                },
+                {
+                    question: "Türk Tugayı, savaş sırasında hangi Birleşmiş Milletler Kolordusu'na bağlı olarak görev yapmıştır?",
+                    answers: ["ABD 1. Kolordu", "İngiliz 5. Kolordu", "Avustralya 3. Kolordu", "Fransız 2. Kolordu"],
+                    correct: "ABD 1. Kolordu",
+                    info: "Türk Tugayı, savaş boyunca ABD'nin farklı tümenleri ve özellikle ABD 1. Kolordusu'nun komutası altında görev almıştır."
+                },
+                {
+                    question: "Kore Savaşı'na katılan Türk askerlerinin ilk ana görev yeri ve en büyük lojistik üssü neresiydi?",
+                    answers: ["Tokyo, Japonya", "Pusan, Kore", "Taegu, Kore", "Ankara, Türkiye"],
+                    correct: "Pusan, Kore",
+                    info: "Türk birlikleri deniz yoluyla Pusan limanına ulaşmış ve Kore'deki ilk büyük üslerini ve lojistik merkezlerini burada kurmuşlardır."
+                },
+                {
+                    question: "Kore Savaşı'nın Kuzey ve Güney Kore arasındaki kalıcı bölünme hattı yaklaşık olarak hangi paraleldir?",
+                    answers: ["17. Paralel", "38. Paralel", "42. Paralel", "49. Paralel"],
+                    correct: "38. Paralel",
+                    info: "Savaş öncesinde de var olan ve ateşkes sonrası sınır olarak kabul edilen hat, yaklaşık olarak 38. kuzey paralelinden geçmektedir ve günümüzde Kore Tarafsız Bölgesi (DMZ) olarak bilinir."
+                },
+                {
+                    question: "Savaşta hayatını kaybeden Türk şehitlerinin tahmini sayısı kaçtır?",
+                    answers: ["700 civarı", "1500 civarı", "3000 civarı", "5000 civarı"],
+                    correct: "700 civarı",
+                    info: "Resmi kayıtlara göre Kore Savaşı'nda 700'den fazla Türk askeri şehit olmuştur. Şehitlerimizin kahramanlıkları unutulmamıştır."
+                }
+            ];
             
-            // Geçerli soruyu al
-            const currentQ = questions[currentQuestionIndex];
-            questionText.textContent = `${currentQuestionIndex + 1}. ${currentQ.question}`;
-            feedbackText.innerHTML = "Cevabınızı seçmek için butona tıklayın.";
-            nextButton.style.display = 'none';
+            let currentQuestionIndex = 0;
+            let score = 0;
 
-            // Cevap butonlarını oluştur
-            currentQ.answers.forEach(answer => {
-                const button = document.createElement('button');
-                button.classList.add('answer-btn');
-                button.textContent = answer;
-                button.addEventListener('click', () => checkAnswer(answer, currentQ.correct, currentQ.info, button));
-                answersContainer.appendChild(button);
-            });
-        }
+            const questionText = document.getElementById('question-text');
+            const answersContainer = document.getElementById('answers-container');
+            const feedbackText = document.getElementById('feedback-text');
+            const nextButton = document.getElementById('next-btn');
+            const scoreDisplay = document.getElementById('score');
+            const totalQuestionsDisplay = document.getElementById('total-questions');
+            const matchingContainer = document.getElementById('matching-container');
+            const scoreArea = document.getElementById('score-area');
+            const matchScoreArea = document.getElementById('match-score-area');
+            const leftColumn = document.getElementById('left-column');
+            const rightColumn = document.getElementById('right-column');
 
-        function checkAnswer(selectedAnswer, correctAnswer, info, clickedButton) {
-            // Cevap kontrol edildikten sonra tüm butonları devre dışı bırak
-            Array.from(answersContainer.children).forEach(btn => btn.disabled = true);
-            
-            // Doğru cevabı bul ve işaretle
-            const correctButton = Array.from(answersContainer.children).find(btn => btn.textContent === correctAnswer);
+            totalQuestionsDisplay.textContent = questions.length;
 
-            if (selectedAnswer === correctAnswer) {
-                score++;
-                scoreDisplay.textContent = score;
-                feedbackText.innerHTML = `✅ **Doğru!** Mükemmel. <br> **Ek Bilgi:** ${info}`;
-                clickedButton.classList.add('correct');
-            } else {
-                feedbackText.innerHTML = `❌ **Yanlış.** Doğru cevap: **${correctAnswer}** idi. <br> **Ek Bilgi:** ${info}`;
-                clickedButton.classList.add('wrong');
-                correctButton.classList.add('correct'); // Doğru cevabı göster
+            function handleMultipleChoiceClick(event) {
+                const clickedButton = event.currentTarget;
+                const currentQ = questions[currentQuestionIndex];
+
+                if (Array.from(answersContainer.children).some(btn => btn.disabled)) return;
+
+                Array.from(answersContainer.children).forEach(btn => {
+                    if (btn !== clickedButton) {
+                        btn.classList.remove('pending-selection');
+                        btn.dataset.clickedOnce = 'false';
+                    }
+                });
+
+                if (clickedButton.dataset.clickedOnce === 'true') {
+                    clickedButton.classList.remove('pending-selection');
+                    clickedButton.dataset.clickedOnce = 'false';
+                    checkAnswer(clickedButton.textContent, currentQ.correct, currentQ.info, clickedButton);
+                } else {
+                    clickedButton.classList.add('pending-selection');
+                    clickedButton.dataset.clickedOnce = 'true';
+                    feedbackText.innerHTML = `**İşaretlemek için 2 kere tıklayın** veya başka bir seçeneği işaretlemek için ona tıklayın.`;
+                }
             }
 
-            nextButton.style.display = 'block';
-        }
 
-        function nextQuestion() {
-            currentQuestionIndex++;
-            if (currentQuestionIndex < questions.length) {
-                loadQuestion();
-            } else {
-                showResults();
+            function loadQuestion() {
+                answersContainer.innerHTML = '';
+                
+                const currentQ = questions[currentQuestionIndex];
+                questionText.textContent = `${currentQuestionIndex + 1}. ${currentQ.question}`;
+                feedbackText.innerHTML = "Cevabınızı seçmek için butona tıklayın.";
+                nextButton.style.display = 'none';
+
+                currentQ.answers.forEach(answer => {
+                    const button = document.createElement('button');
+                    button.classList.add('answer-btn');
+                    button.textContent = answer;
+                    button.dataset.clickedOnce = 'false';
+                    button.addEventListener('click', handleMultipleChoiceClick);
+                    answersContainer.appendChild(button);
+                });
             }
-        }
 
-        function showResults() {
-            questionText.textContent = "Yarışma Tamamlandı!";
-            answersContainer.innerHTML = '';
-            feedbackText.innerHTML = `
-                Tebrikler! ${questions.length} soruda **${score}** doğru cevap verdiniz. <br>
-                Bu önemli tarihi konuya gösterdiğiniz ilgi için teşekkür ederiz.
-            `;
-            nextButton.style.display = 'none';
+            function checkAnswer(selectedAnswer, correctAnswer, info, clickedButton) {
+                Array.from(answersContainer.children).forEach(btn => btn.disabled = true);
+                
+                const correctButton = Array.from(answersContainer.children).find(btn => btn.textContent === correctAnswer);
+
+                if (selectedAnswer === correctAnswer) {
+                    score++;
+                    scoreDisplay.textContent = score;
+                    feedbackText.innerHTML = `✅ **Doğru!** Mükemmel. <br> **Ek Bilgi:** ${info}`;
+                    clickedButton.classList.add('correct');
+                } else {
+                    feedbackText.innerHTML = `❌ **Yanlış.** Doğru cevap: **${correctAnswer}** idi. <br> **Ek Bilgi:** ${info}`;
+                    clickedButton.classList.add('wrong');
+                    if (correctButton) correctButton.classList.add('correct'); 
+                }
+
+                nextButton.style.display = 'block';
+            }
+
+            function nextQuestion() {
+                currentQuestionIndex++;
+                if (currentQuestionIndex < questions.length) {
+                    loadQuestion();
+                } else {
+                    startMatchingGame(); 
+                }
+            }
             
-            const finalMessage = document.createElement('p');
-            finalMessage.classList.add('final-message');
-            finalMessage.innerHTML = "Tüm Şehitlerimizi ve Gazilerimizi Saygı ve Minnetle Anıyoruz!";
-            answersContainer.appendChild(finalMessage);
-        }
+            const matchingPairs = [
+                { id: 1, left: "38. Paralel", right: "Kalıcı Bölünme Hattı" },
+                { id: 2, left: "Pusan", right: "Türk Şehitliği'nin Bulunduğu Şehir" },
+                { id: 3, left: "Kumyangjangni", right: "Türk Tugayı'nın Önemli Zaferi" },
+                { id: 4, left: "Celâl Bayar", right: "Savaş Dönemi T.C. Cumhurbaşkanı" },
+                { id: 5, left: "Tuğgeneral Tahsin Yazıcı", right: "Türk Tugayı Komutanı" },
+                { id: 6, left: "Ankara Okulu", right: "Koreli Yetimler İçin Kurulan Okul" },
+                { id: 7, left: "27 Temmuz 1953", right: "Ateşkes Antlaşması Tarihi" },
+                { id: 8, left: "Birleşmiş Milletler", right: "Türk Tugayı'nın Gönderilme Nedeni" }
+            ];
 
-        // Başlangıç işlevi
-        nextButton.addEventListener('click', nextQuestion);
-        loadQuestion();
+            let selectedLeft = null;
+            let selectedRight = null;
+            let matchScore = 0;
+            const totalMatches = matchingPairs.length;
+            
+            function startMatchingGame() {
+                answersContainer.style.display = 'none';
+                scoreArea.style.display = 'none';
+                nextButton.style.display = 'none';
+                
+                matchingContainer.style.display = 'flex';
+                matchScoreArea.style.display = 'block';
+
+                matchScoreArea.innerHTML = `Eşleşen Sayısı: <span id="match-score">${matchScore}</span> / ${totalMatches}`;
+                document.getElementById('match-score').textContent = matchScore;
+
+                questionText.textContent = "2. BÖLÜM: Eşleştirme Oyunu - Doğru Kavramları Eşleştirin!";
+                feedbackText.innerHTML = "Sol ve sağ sütundan doğru çiftleri sırayla seçin.";
+                
+                const leftItems = matchingPairs.map(p => ({ id: p.id, text: p.left, side: 'left' }));
+                const rightItems = shuffleArray(matchingPairs.map(p => ({ id: p.id, text: p.right, side: 'right' })));
+
+                renderMatchingItems(leftItems, rightItems);
+            }
+
+            function shuffleArray(array) {
+                for (let i = array.length - 1; i > 0; i--) {
+                    const j = Math.floor(Math.random() * (i + 1));
+                    [array[i], array[j]] = [array[j], array[i]];
+                }
+                return array;
+            }
+
+            function renderMatchingItems(leftItems, rightItems) {
+                leftColumn.innerHTML = '';
+                rightColumn.innerHTML = '';
+
+                leftItems.forEach(item => {
+                    const div = createMatchElement(item, 'left');
+                    leftColumn.appendChild(div);
+                });
+
+                rightItems.forEach(item => {
+                    const div = createMatchElement(item, 'right');
+                    rightColumn.appendChild(div);
+                });
+            }
+
+            function createMatchElement(item, side) {
+                const div = document.createElement('div');
+                div.classList.add('match-item', `${side}-item`);
+                div.textContent = item.text;
+                div.dataset.id = item.id;
+                div.dataset.side = side;
+                div.addEventListener('click', handleMatchClick);
+                return div;
+            }
+
+            function clearPendingSelection() {
+                const allItems = document.querySelectorAll('.match-item');
+                allItems.forEach(item => item.classList.remove('pending-selection'));
+            }
+
+            function handleMatchClick(event) {
+                const clickedElement = event.target;
+                
+                if (clickedElement.classList.contains('matched')) return;
+
+                const side = clickedElement.dataset.side;
+                const isSelected = clickedElement.classList.contains('selected');
+                
+                if (selectedLeft && selectedRight && isSelected) {
+                    clearPendingSelection();
+                    checkMatch();
+                    return;
+                }
+                
+                clearPendingSelection();
+
+                
+                if (side === 'left') {
+                    if (isSelected) {
+                        selectedLeft.classList.remove('selected');
+                        selectedLeft = null;
+                    } else {
+                        if (selectedLeft) selectedLeft.classList.remove('selected');
+                        clickedElement.classList.add('selected');
+                        selectedLeft = clickedElement;
+                    }
+                } else {
+                    if (isSelected) {
+                        selectedRight.classList.remove('selected');
+                        selectedRight = null;
+                    } else {
+                        if (selectedRight) selectedRight.classList.remove('selected');
+                        clickedElement.classList.add('selected');
+                        selectedRight = clickedElement;
+                    }
+                }
+                
+                selectedLeft = document.querySelector('#left-column .selected');
+                selectedRight = document.querySelector('#right-column .selected');
+
+                if (selectedLeft && selectedRight) {
+                    selectedLeft.classList.add('pending-selection');
+                    selectedRight.classList.add('pending-selection');
+                    
+                    feedbackText.innerHTML = `Eşleştirmeyi onaylamak için **iki seçili öğeden birine tekrar tıklayın.**`;
+
+                } else if (selectedLeft || selectedRight) {
+                    feedbackText.innerHTML = "Şimdi diğer sütundan eşleştirmek istediğiniz öğeyi seçin.";
+                } else {
+                    feedbackText.innerHTML = "Sol ve sağ sütundan doğru çiftleri sırayla seçin.";
+                }
+            }
+
+
+            function checkMatch() {
+                if (selectedLeft.dataset.id === selectedRight.dataset.id) {
+                    matchScore++;
+                    document.getElementById('match-score').textContent = matchScore;
+                    feedbackText.innerHTML = `✅ **Doğru Eşleştirme!** Mükemmel.`;
+                    
+                    selectedLeft.classList.add('matched');
+                    selectedRight.classList.add('matched');
+                    selectedLeft.classList.remove('selected', 'pending-selection', 'left-item');
+                    selectedRight.classList.remove('selected', 'pending-selection', 'right-item');
+                    selectedLeft.removeEventListener('click', handleMatchClick);
+                    selectedRight.removeEventListener('click', handleMatchClick);
+                    
+                    selectedLeft = null;
+                    selectedRight = null;
+
+                    if (matchScore === totalMatches) {
+                        endQuiz();
+                    }
+
+                } else {
+                    feedbackText.innerHTML = `❌ **Yanlış Eşleştirme.** Tekrar deneyin.`;
+                    
+                    setTimeout(() => {
+                        if (selectedLeft) selectedLeft.classList.remove('selected');
+                        if (selectedRight) selectedRight.classList.remove('selected');
+
+                        selectedLeft = null;
+                        selectedRight = null;
+                        feedbackText.innerHTML = "Sol ve sağ sütundan doğru çiftleri sırayla seçin.";
+                    }, 700);
+                }
+            }
+
+            function endQuiz() {
+                
+                matchingContainer.style.display = 'none';
+                matchScoreArea.style.display = 'none';
+                scoreArea.style.display = 'none'; 
+                answersContainer.innerHTML = ''; 
+                
+                
+                questionText.textContent = "Yarışma Başarıyla Tamamlandı!";
+
+                
+                const finalContent = `
+                    <div style="text-align: center; font-size: 1.1em; color: #333; margin-top: 20px;">
+                        Çoktan Seçmeli Puanınız: <b>${score}</b> / ${questions.length} <br>
+                        Eşleştirme Puanınız: <b>${matchScore}</b> / ${totalMatches}
+                    </div>
+                    
+                    <span class="final-congrats">Tebrikler!</span>
+                    
+                    <div class="final-tribute-message">
+                        Tüm Şehitlerimizi ve Gazilerimizi Saygı ve Minnetle Anıyoruz!
+                    </div>
+                `;
+                feedbackText.innerHTML = finalContent;
+            }
+
+            
+            nextButton.addEventListener('click', nextQuestion);
+            loadQuestion();
+        });
     </script>
 </body>
 </html>
